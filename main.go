@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/gocolly/colly"
-	"github.com/hn275/uvic-scraper/courses"
 )
 
-var mockdata []courses.Class
+// var mockdata []courses.Class
 
 func init() {
 	// In case I need this later.
@@ -24,13 +24,16 @@ func init() {
 }
 
 const (
-	TERM = 202301
+	SUBJECT = "CSC"
+	COURSE  = "116"
+	TERM    = 202209
 )
 
 type ClassInfo struct {
-	Weekday  string `json:"weekday"`
-	Time     string `json:"time"`
-	Building string `json:"building"`
+	Weekday   string `json:"weekday"`
+	Time      string `json:"time"`
+	Building  string `json:"building"`
+	DateRange string `json:"date_range"`
 }
 
 var class ClassInfo
@@ -50,51 +53,34 @@ func main() {
 		childNodes := sel.Children().Nodes
 
 		if len(childNodes) == 7 {
-			class.Weekday = trimspace(sel.FindNodes(childNodes[2]).Text())
 			class.Time = trimspace(sel.FindNodes(childNodes[1]).Text())
+			class.Weekday = trimspace(sel.FindNodes(childNodes[2]).Text())
 			class.Building = trimspace(sel.FindNodes(childNodes[3]).Text())
+			class.DateRange = trimspace(sel.FindNodes(childNodes[4]).Text())
+
+			allClasses = append(allClasses, class)
+			class = ClassInfo{}
 		}
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		if class.Building != "" {
-			allClasses = append(allClasses, class)
+		fmt.Println(allClasses)
+		output, err := json.MarshalIndent(&allClasses, "", "  ")
+		if err != nil {
+			log.Fatal(err)
 		}
-		class = ClassInfo{}
+
+		fmt.Println(string(output))
 	})
 
-	// TEST
-	allCourses := []courses.Class{
-		{
-			Subject: "CHEM",
-			Course:  "101",
-		},
-		{
-			Subject: "CHEM",
-			Course:  "102",
-		},
-		{
-			Subject: "CHEM",
-			Course:  "150",
-		},
-		{
-			Subject: "BIOL",
-			Course:  "468",
-		},
-	}
-
-	for _, course := range allCourses {
-		c.Visit(url(course.Subject, course.Course))
-	}
-
-	fmt.Println(allClasses) // TODO: remove later
+	c.Visit(url(SUBJECT, COURSE, TERM))
 }
 
 func trimspace(s string) string {
 	return strings.TrimSpace(s)
 }
 
-func url(subject, course string) string {
+func url(subject, course string, term int) string {
 	/*
 		https://www.uvic.ca/BAN1P/bwckctlg.p_disp_listcrse
 		?term_in=202209
@@ -106,7 +92,7 @@ func url(subject, course string) string {
 	visitingUrl := fmt.Sprintf(
 		"%s?term_in=%d&subj_in=%s&crse_in=%s&schd_in=",
 		baseUrl,
-		TERM,
+		term,
 		subject,
 		course,
 	)
