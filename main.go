@@ -11,9 +11,9 @@ import (
 
 var mockdata []courses.Class
 
-// Mocking data so no request is needed
 func init() {
-	// courses, err := ioutil.ReadFile("./allcourses.json")
+	// In case I need this later.
+	// courses, err := ioutil.ReadFile("./all_uvic_courses.json")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -24,7 +24,7 @@ func init() {
 }
 
 const (
-	TERM = 202209
+	TERM = 202301
 )
 
 type ClassInfo struct {
@@ -54,34 +54,32 @@ func main() {
 			class.Time = trimspace(sel.FindNodes(childNodes[1]).Text())
 			class.Building = trimspace(sel.FindNodes(childNodes[3]).Text())
 		}
-
-		/*
-			newClass := ClassInfo{weekday, time, building}
-			if newClass.date != "" {
-				class.date = newClass.date
-				class.building = newClass.building
-				class.time = newClass.time
-			}
-		*/
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		allClasses = append(allClasses, class)
+		if class.Building != "" {
+			allClasses = append(allClasses, class)
+		}
 		class = ClassInfo{}
 	})
 
+	// TEST
 	allCourses := []courses.Class{
 		{
-			Subject: "CSC",
-			Course:  "116",
+			Subject: "CHEM",
+			Course:  "101",
 		},
 		{
-			Subject: "STAT",
-			Course:  "260",
+			Subject: "CHEM",
+			Course:  "102",
 		},
 		{
-			Subject: "ECE",
-			Course:  "260",
+			Subject: "CHEM",
+			Course:  "150",
+		},
+		{
+			Subject: "BIOL",
+			Course:  "468",
 		},
 	}
 
@@ -89,7 +87,7 @@ func main() {
 		c.Visit(url(course.Subject, course.Course))
 	}
 
-	fmt.Println(allClasses)
+	fmt.Println(allClasses) // TODO: remove later
 }
 
 func trimspace(s string) string {
@@ -98,10 +96,11 @@ func trimspace(s string) string {
 
 func url(subject, course string) string {
 	/*
-		https://www.uvic.ca/BAN1P/bwckctlg.p_disp_listcrse?
-		term_in=202209&
-		subj_in=STAT&
-		crse_in=260&schd_in=
+		https://www.uvic.ca/BAN1P/bwckctlg.p_disp_listcrse
+		?term_in=202209
+		&subj_in=STAT
+		&crse_in=260
+		&schd_in=
 	*/
 	baseUrl := "https://www.uvic.ca/BAN1P/bwckctlg.p_disp_listcrse"
 	visitingUrl := fmt.Sprintf(
