@@ -7,7 +7,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
-func GetCourseInfo(subject string, course, term int) (ClassInfo, error) {
+func GetCourseInfo(subject, course string, term int) (ClassInfo, error) {
 	s := ClassInfo{
 		Subject:  subject,
 		Course:   course,
@@ -15,6 +15,7 @@ func GetCourseInfo(subject string, course, term int) (ClassInfo, error) {
 		Location: []ClassLocation{},
 	}
 	var e error = nil
+
 	c := colly.NewCollector()
 
 	c.OnError(func(r *colly.Response, err error) {
@@ -30,11 +31,20 @@ func GetCourseInfo(subject string, course, term int) (ClassInfo, error) {
 		if len(childNodes) == 7 {
 			class.Time = trimspace(sel.FindNodes(childNodes[1]).Text())
 			class.Weekday = trimspace(sel.FindNodes(childNodes[2]).Text())
-			class.Building = trimspace(sel.FindNodes(childNodes[3]).Text())
 			class.DateRange = trimspace(sel.FindNodes(childNodes[4]).Text())
 
+			/* PARSING BUILDING AND ROOM */
+			b := trimspace(sel.FindNodes(childNodes[3]).Text())
+			bSplit := strings.Split(b, " ")
+
+			room := bSplit[len(bSplit)-1:]
+			building := bSplit[:len(bSplit)-1]
+
+			class.Room = room[0]
+			class.Building = strings.Join(building, " ")
+
 			s.Location = append(s.Location, class)
-			class = ClassLocation{}
+			class = ClassLocation{} // reset class for the next table
 		}
 	})
 
@@ -47,7 +57,7 @@ func trimspace(s string) string {
 	return strings.TrimSpace(s)
 }
 
-func url(subject string, course, term int) string {
+func url(subject, course string, term int) string {
 	/*
 		https://www.uvic.ca/BAN1P/bwckctlg.p_disp_listcrse
 		?term_in=202209
@@ -57,7 +67,7 @@ func url(subject string, course, term int) string {
 	*/
 	baseUrl := "https://www.uvic.ca/BAN1P/bwckctlg.p_disp_listcrse"
 	visitingUrl := fmt.Sprintf(
-		"%s?term_in=%d&subj_in=%s&crse_in=%d&schd_in=",
+		"%s?term_in=%d&subj_in=%s&crse_in=%s&schd_in=",
 		baseUrl,
 		term,
 		subject,

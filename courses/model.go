@@ -12,12 +12,13 @@ type ClassLocation struct {
 	Weekday   string `json:"weekday"`
 	Time      string `json:"time"`
 	Building  string `json:"building"`
+	Room      string `json:"room"`
 	DateRange string `json:"date_range"`
 }
 
 type ClassInfo struct {
 	Subject  string          `json:"subject"`
-	Course   int             `json:"course"`
+	Course   string          `json:"course"`
 	Term     int             `json:"term"`
 	Location []ClassLocation `json:"location"`
 }
