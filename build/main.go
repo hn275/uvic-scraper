@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/hn275/uvic-scraper/courses"
 )
@@ -23,7 +22,6 @@ var wg sync.WaitGroup
 
 const TERM = 202301
 
-/* NOTE: Don't run yet, run the shape by the team to make sure it's good
 func main() {
 	allCourses, err := courses.GetAllCourses()
 	if err != nil {
@@ -32,12 +30,11 @@ func main() {
 
 	for _, v := range allCourses {
 		wg.Add(1)
+		time.Sleep(time.Millisecond * 50) // otherwise uvic server can't handle all the process at the same time :/
 		go func(ch chan<- courses.ClassInfo, a courses.Class) {
-			fmt.Printf("Scraping %s%s...\n", a.Subject, a.Course)
-
 			s, err := courses.GetCourseInfo(a.Subject, a.Course, TERM)
 			if err != nil {
-				log.Printf("failed to parsed %s%s:%v\n", a.Subject, a.Course, err)
+				log.Printf("failed to parsed %s%s:\n%v\n", a.Subject, a.Course, err)
 			}
 			ch <- s
 
@@ -65,4 +62,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-*/
