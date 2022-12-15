@@ -1,0 +1,72 @@
+[
+  {
+    "subject": "ADMN",
+    "course": "314",
+    "term": 202301,
+    "location": [
+      {
+        "weekday": "",
+        "time": "TBA",
+        "building": "",
+        "room": "TBA",
+        "date_range": "Jan 09, 2023 - Apr 06, 2023"
+      }
+    ]
+  },
+  {
+    "subject": "ADMN",
+    "course": "311",
+    "term": 202301,
+    "location": [
+      {
+        "weekday": "W",
+        "time": "6:30 pm - 9:20 pm",
+        "building": "Cornett Building",
+        "room": "B111",
+        "date_range": "Jan 09, 2023 - Apr 06, 2023"
+      }
+    ]
+  },
+  {
+    "subject": "ADMN",
+    "course": "310",
+    "term": 202301,
+    "location": [
+      {
+        "weekday": "",
+        "time": "TBA",
+        "building": "",
+        "room": "TBA",
+        "date_range": "Jan 09, 2023 - Apr 06, 2023"
+      }
+    ]
+  },
+  {
+    "subject": "ADMN",
+    "course": "420",
+    "term": 202301,
+    "location": [
+      {
+        "weekday": "",
+        "time": "TBA",
+        "building": "",
+        "room": "TBA",
+        "date_range": "Jan 09, 2023 - Apr 06, 2023"
+      }
+    ]
+  },
+  {
+    "subject": "ADMN",
+    "course": "411",
+    "term": 202301,
+    "location": [
+      {
+        "weekday": "",
+        "time": "TBA",
+        "building": "",
+        "room": "TBA",
+        "date_range": "Jan 09, 2023 - Apr 06, 2023"
+      }
+    ]
+  }
+]

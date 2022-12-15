@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hn275/uvic-scraper/courses"
+	"github.com/hn275/uvic-scraper/util"
 )
 
 type course struct {
@@ -23,22 +24,31 @@ var wg sync.WaitGroup
 const TERM = 202301
 
 func main() {
+	log.Printf("%s\n", util.LogColor("GREEN", "Fetching all courses"))
 	allCourses, err := courses.GetAllCourses()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("%s: %v\n", util.LogColor("RED", "FAILED"), err)
 	}
 
-	for _, v := range allCourses {
+	total := len(allCourses)
+
+	for i, v := range allCourses {
+		if i > 10 {
+			break
+		}
 		wg.Add(1)
-		time.Sleep(time.Millisecond * 50) // otherwise uvic server can't handle all the process at the same time :/
-		go func(ch chan<- courses.ClassInfo, a courses.Class) {
+		time.Sleep(time.Millisecond * 25) // otherwise uvic server can't handle all the process at the same time :/
+		log.Printf("%s %s%s\n", util.LogColor("YELLOW", "Fetching"), v.Subject, v.Course)
+		go func(ch chan<- courses.ClassInfo, a courses.Class, i int) {
 			s, err := courses.GetCourseInfo(a.Subject, a.Course, TERM)
 			if err != nil {
-				log.Printf("failed to parsed %s%s:\n%v\n", a.Subject, a.Course, err)
+				log.Printf("%s: %s%s:\n%v\n", util.LogColor("RED", "FAILED"), a.Subject, a.Course, err)
+			} else {
+				log.Printf("%s: %s%s\t(%d/%d)\n", util.LogColor("GREEN", "SUCCESS"), v.Subject, v.Course, i, total)
 			}
 			ch <- s
 
-		}(ch, v)
+		}(ch, v, i)
 
 		go func(ch <-chan courses.ClassInfo) {
 			defer wg.Done()
@@ -53,12 +63,16 @@ func main() {
 	wg.Wait()
 	close(ch)
 
+	log.Printf("%s, generating json\n", util.LogColor("GREEN", "Fetch success"))
+
 	s, err := json.MarshalIndent(&data, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if err := os.WriteFile("./data.json", s, 0666); err != nil {
-		log.Fatal(err)
+		log.Printf("%s: %v\n", util.LogColor("RED", "FAILED"), err)
 	}
+
+	log.Printf("%s\n", util.LogColor("GREEN", "DONE"))
 }

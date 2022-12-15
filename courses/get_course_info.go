@@ -2,14 +2,12 @@ package courses
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/gocolly/colly"
 )
 
 func GetCourseInfo(subject, course string, term int) (ClassInfo, error) {
-	log.Printf("Fetching %s%s\n", subject, course)
 	s := ClassInfo{
 		Subject:  subject,
 		Course:   course,
@@ -48,10 +46,6 @@ func GetCourseInfo(subject, course string, term int) (ClassInfo, error) {
 			s.Location = append(s.Location, class)
 			class = ClassLocation{} // reset class for the next table
 		}
-	})
-
-	c.OnScraped(func(_ *colly.Response) {
-		log.Printf("Sucessfully scraped %s%s\n", subject, course)
 	})
 
 	c.Visit(url(subject, course, term))
