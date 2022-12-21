@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -17,9 +18,9 @@ type course struct {
 	term    int
 }
 
-var ch = make(chan courses.ClassInfo)
 var data []courses.ClassInfo
 var wg sync.WaitGroup
+var count int = 0
 
 const TERM = 202301
 
@@ -30,40 +31,43 @@ func main() {
 		log.Printf("%s: %v\n", util.LogColor("RED", "FAILED"), err)
 	}
 
-	total := len(allCourses)
+	// fetchCount := len(allCourses)
+	fetchCount := 10
 
-	for i, v := range allCourses {
-		if i > 10 {
+	for index, course := range allCourses {
+		if index >= fetchCount {
 			break
 		}
+
 		wg.Add(1)
-		time.Sleep(time.Millisecond * 25) // otherwise uvic server can't handle all the process at the same time :/
-		log.Printf("%s %s%s\n", util.LogColor("YELLOW", "Fetching"), v.Subject, v.Course)
-		go func(ch chan<- courses.ClassInfo, a courses.Class, i int) {
-			s, err := courses.GetCourseInfo(a.Subject, a.Course, TERM)
-			if err != nil {
-				log.Printf("%s: %s%s:\n%v\n", util.LogColor("RED", "FAILED"), a.Subject, a.Course, err)
-			} else {
-				log.Printf("%s: %s%s\t(%d/%d)\n", util.LogColor("GREEN", "SUCCESS"), v.Subject, v.Course, i, total)
-			}
-			ch <- s
+		time.Sleep(time.Millisecond * 25) // otherwise requests get aired out
 
-		}(ch, v, i)
+		log.Printf("%s %s%s\n", util.LogColor("YELLOW", "Fetching"), course.Subject, course.Course)
 
-		go func(ch <-chan courses.ClassInfo) {
+		/* Make request then send fetched data */
+		go func(a courses.Class, i int) {
 			defer wg.Done()
 
-			courseInfo := <-ch
+			courseInfo, err := courses.GetCourseInfo(a.Subject, a.Course, TERM)
+			if err != nil {
+				log.Printf("%s: %s%s:\n%v\n", util.LogColor("RED", "FAILED"), a.Subject, a.Course, err)
+				return
+			}
+
+			log.Printf("%s: %s%s\t(%d/%d)\n", util.LogColor("GREEN", "PARSED"), a.Subject, a.Course, i+1, fetchCount)
 			if len(courseInfo.Location) != 0 {
 				data = append(data, courseInfo)
+				count++
 			}
-		}(ch)
+
+		}(course, index)
+
 	}
 
 	wg.Wait()
-	close(ch)
 
-	log.Printf("%s, generating json\n", util.LogColor("GREEN", "Fetch success"))
+	fmt.Println(util.LogColor("GREEN", fmt.Sprintf("PARSED %d RECORDS", count)))
+	fmt.Printf(util.LogColor("RED", fmt.Sprintf("SKIPPED %d RECORDS\n", fetchCount-count)))
 
 	s, err := json.MarshalIndent(&data, "", "  ")
 	if err != nil {
@@ -71,8 +75,8 @@ func main() {
 	}
 
 	if err := os.WriteFile("./data.json", s, 0666); err != nil {
-		log.Printf("%s: %v\n", util.LogColor("RED", "FAILED"), err)
+		fmt.Printf("%s: %v\n", util.LogColor("RED", "FAILED"), err)
 	}
 
-	log.Printf("%s\n", util.LogColor("GREEN", "DONE"))
+	fmt.Println("Done")
 }

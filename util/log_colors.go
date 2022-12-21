@@ -8,7 +8,7 @@ func LogColor(c, s string) string {
 		color = "\033[0;32m"
 		break
 	case "RED":
-		color = "\033[1;90m"
+		color = "\033[1;31m"
 	case "YELLOW":
 		color = "\033[0;33m"
 	default:

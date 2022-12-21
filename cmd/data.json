@@ -1,7 +1,7 @@
 [
   {
     "subject": "ADMN",
-    "course": "314",
+    "course": "310",
     "term": 202301,
     "location": [
       {
@@ -29,21 +29,7 @@
   },
   {
     "subject": "ADMN",
-    "course": "310",
-    "term": 202301,
-    "location": [
-      {
-        "weekday": "",
-        "time": "TBA",
-        "building": "",
-        "room": "TBA",
-        "date_range": "Jan 09, 2023 - Apr 06, 2023"
-      }
-    ]
-  },
-  {
-    "subject": "ADMN",
-    "course": "420",
+    "course": "314",
     "term": 202301,
     "location": [
       {
