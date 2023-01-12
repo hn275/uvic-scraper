@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	SUBJECT = "CSC"
-	COURSE  = 116
+	SUBJECT = "ECE"
+	COURSE  = 260
 	TERM    = 202209
 )
 

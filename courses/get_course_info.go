@@ -28,6 +28,11 @@ func GetCourseInfo(subject string, course, term int) (ClassInfo, error) {
 		childNodes := sel.Children().Nodes
 
 		if len(childNodes) == 7 {
+			classType := trimspace(sel.FindNodes(childNodes[5]).Text())
+			if classType == "Lab" {
+				return
+			}
+
 			class.Time = trimspace(sel.FindNodes(childNodes[1]).Text())
 			class.Weekday = trimspace(sel.FindNodes(childNodes[2]).Text())
 			class.Building = trimspace(sel.FindNodes(childNodes[3]).Text())
